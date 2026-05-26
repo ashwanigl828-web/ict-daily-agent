@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 शिक्षक डैशबोर्ड — ICT दैनिक ज्ञान</title>
+<meta http-equiv="refresh" content="300">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  /* ============================
+     DASHBOARD SPECIFIC STYLES
+     ============================ */
+
+  .dashboard-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  /* Top Header */
+  .dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .dash-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .dash-logo-icon {
+    font-size: 40px;
+    line-height: 1;
+  }
+
+  .dash-title {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dash-subtitle {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+  }
+
+  .dash-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .dash-date-badge {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .refresh-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .refresh-dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* Summary Stats Row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.2);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .stat-card:nth-child(1)::before { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+  .stat-card:nth-child(2)::before { background: linear-gradient(90deg, #10b981, #34d399); }
+  .stat-card:nth-child(3)::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .stat-card:nth-child(4)::before { background: linear-gradient(90deg, #ec4899, #f472b6); }
+
+  .stat-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .stat-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 500;
+  }
+
+  /* Class-wise Cards */
+  .class-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  .class-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .class-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.2);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+
+  .class-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .class-card-title {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .class-card-emoji {
+    font-size: 24px;
+  }
+
+  .class-card-badge {
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .class-card-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .class-stat-item {
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .class-stat-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .class-stat-label {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .class-card-topic {
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-top: 12px;
+  }
+
+  .class-card-topic-label {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .class-card-topic-name {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.8);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  /* Understanding Breakdown Bar */
+  .understanding-bar {
+    display: flex;
+    height: 8px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0 6px 0;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .understanding-bar .bar-full {
+    background: #4ade80;
+  }
+  .understanding-bar .bar-partial {
+    background: #fbbf24;
+  }
+  .understanding-bar .bar-none {
+    background: #f87171;
+  }
+
+  .understanding-legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .legend-dot.full { background: #4ade80; }
+  .legend-dot.partial { background: #fbbf24; }
+  .legend-dot.none { background: #f87171; }
+
+  /* Charts Section */
+  .charts-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  .chart-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 24px;
+  }
+
+  .chart-title {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chart-container {
+    position: relative;
+    width: 100%;
+    max-height: 300px;
+  }
+
+  /* Recent Topics Table */
+  .topics-section {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+
+  .topics-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .topics-table th {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .topics-table td {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .topics-table tr:hover td {
+    background: rgba(255,255,255,0.03);
+  }
+
+  .topic-class-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .score-bar-mini {
+    display: inline-block;
+    width: 60px;
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 6px;
+    overflow: hidden;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
+  .score-bar-mini-fill {
+    height: 100%;
+    border-radius: 6px;
+  }
+
+  /* Dashboard Footer */
+  .dash-footer {
+    text-align: center;
+    padding: 20px 0 40px 0;
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 12px;
+    color: rgba(255,255,255,0.25);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .dashboard-wrapper {
+      padding: 14px;
+    }
+    .dash-title {
+      font-size: 22px;
+    }
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .class-cards-grid {
+      grid-template-columns: 1fr;
+    }
+    .charts-section {
+      grid-template-columns: 1fr;
+    }
+    .topics-table {
+      font-size: 11px;
+    }
+    .stat-value {
+      font-size: 26px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .stats-row {
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .dash-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  /* Animations */
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-card, .class-card, .chart-card, .topics-section {
+    animation: fadeSlideUp 0.6s ease forwards;
+    opacity: 0;
+  }
+
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.1s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.2s; }
+  .class-card:nth-child(1) { animation-delay: 0.25s; }
+  .class-card:nth-child(2) { animation-delay: 0.3s; }
+  .class-card:nth-child(3) { animation-delay: 0.35s; }
+  .class-card:nth-child(4) { animation-delay: 0.4s; }
+  .class-card:nth-child(5) { animation-delay: 0.45s; }
+  .chart-card { animation-delay: 0.5s; }
+  .topics-section { animation-delay: 0.55s; }
+</style>
+</head>
+<body>
+  <div class="dashboard-wrapper">
+
+    <!-- ===== HEADER ===== -->
+    <div class="dash-header">
+      <div class="dash-header-left">
+        <span class="dash-logo-icon">📊</span>
+        <div>
+          <div class="dash-title">शिक्षक डैशबोर्ड</div>
+          <div class="dash-subtitle">ICT दैनिक ज्ञान — विश्लेषण पैनल</div>
+        </div>
+      </div>
+      <div class="dash-header-right">
+        <div class="dash-date-badge">📅 {{ dashboard_data.current_date }}</div>
+        <div class="refresh-indicator">
+          <span class="refresh-dot"></span>
+          हर 5 मिनट में अपडेट
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode Banner -->
+    {% if not whatsapp_configured %}
+    <div style="background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,191,36,0.08));
+                border: 1px solid rgba(245,158,11,0.3); border-radius: 14px; padding: 14px 20px;
+                margin-bottom: 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+      <span style="font-size: 24px;">📋</span>
+      <div style="flex: 1;">
+        <div style="font-family: 'Noto Sans Devanagari', sans-serif; font-size: 14px; font-weight: 700; color: #fbbf24;">
+          मैनुअल मोड चालू है
+        </div>
+        <div style="font-family: 'Noto Sans Devanagari', sans-serif; font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px;">
+          PDF बनें → नीचे हर class में "📱 WhatsApp Share" बटन दबाएं → Group में भेजें
+        </div>
+      </div>
+      <button onclick="triggerDaily()" id="triggerBtn"
+              style="padding: 10px 22px; border-radius: 12px; border: none; cursor: pointer;
+                     background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;
+                     font-family: 'Noto Sans Devanagari', sans-serif; font-size: 13px; font-weight: 700;
+                     transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(245,158,11,0.3);
+                     white-space: nowrap;"
+              onmouseover="this.style.transform='translateY(-2px)'"
+              onmouseout="this.style.transform='translateY(0)'">
+        🚀 आज की PDF बनाएं
+      </button>
+    </div>
+    {% else %}
+    <div style="background: linear-gradient(135deg, rgba(74,222,128,0.1), rgba(34,197,94,0.05));
+                border: 1px solid rgba(74,222,128,0.2); border-radius: 14px; padding: 12px 20px;
+                margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 20px;">✅</span>
+      <div style="font-family: 'Noto Sans Devanagari', sans-serif; font-size: 13px; color: rgba(255,255,255,0.6);">
+        <strong style="color: #4ade80;">ऑटो मोड</strong> — PDF रोज़ सुबह 8 बजे अपने आप बनकर WhatsApp पर भेजी जाएगी
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ===== SUMMARY STATS ===== -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-icon">📨</span>
+        <div class="stat-value">{{ dashboard_data.total_responses }}</div>
+        <div class="stat-label">आज के कुल जवाब</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📖</span>
+        <div class="stat-value">{{ dashboard_data.total_read_percent }}%</div>
+        <div class="stat-label">पढ़ने की दर</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">🏆</span>
+        <div class="stat-value">{{ dashboard_data.avg_quiz_score }}%</div>
+        <div class="stat-label">औसत क्विज़ स्कोर</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📚</span>
+        <div class="stat-value">{{ dashboard_data.total_topics }}</div>
+        <div class="stat-label">कुल विषय भेजे गए</div>
+      </div>
+    </div>
+
+    <!-- ===== CLASS-WISE CARDS ===== -->
+    <div class="class-cards-grid">
+      {% set class_themes = {
+        '8': {'color': '#3b82f6', 'bg': 'rgba(59,130,246,0.15)', 'emoji': '🔵', 'name': 'कक्षा 8'},
+        '9': {'color': '#10b981', 'bg': 'rgba(16,185,129,0.15)', 'emoji': '🟢', 'name': 'कक्षा 9'},
+        '10': {'color': '#8b5cf6', 'bg': 'rgba(139,92,246,0.15)', 'emoji': '🟣', 'name': 'कक्षा 10'},
+        '11': {'color': '#f59e0b', 'bg': 'rgba(245,158,11,0.15)', 'emoji': '🟠', 'name': 'कक्षा 11'},
+        '12': {'color': '#ef4444', 'bg': 'rgba(239,68,68,0.15)', 'emoji': '🔴', 'name': 'कक्षा 12'}
+      } %}
+
+      {% for cls in ['8', '9', '10', '11', '12'] %}
+      {% if dashboard_data.classes[cls] is defined %}
+      {% set cd = dashboard_data.classes[cls] %}
+      {% set ct = class_themes[cls] %}
+      <div class="class-card" style="border-top: 3px solid {{ ct.color }};">
+        <div class="class-card-header">
+          <div class="class-card-title">
+            <span class="class-card-emoji">{{ ct.emoji }}</span>
+            {{ ct.name }}
+          </div>
+          <span class="class-card-badge" style="background: {{ ct.bg }}; color: {{ ct.color }};">
+            {{ cd.total_students }} विद्यार्थी
+          </span>
+        </div>
+
+        <div class="class-card-stats">
+          <div class="class-stat-item">
+            <div class="class-stat-value" style="color: {{ ct.color }};">{{ cd.total_responses }}</div>
+            <div class="class-stat-label">जवाब मिले</div>
+          </div>
+          <div class="class-stat-item">
+            <div class="class-stat-value" style="color: {{ ct.color }};">{{ cd.read_percent }}%</div>
+            <div class="class-stat-label">पढ़ा</div>
+          </div>
+          <div class="class-stat-item">
+            <div class="class-stat-value" style="color: {{ ct.color }};">{{ cd.avg_quiz_score }}%</div>
+            <div class="class-stat-label">क्विज़ स्कोर</div>
+          </div>
+          <div class="class-stat-item">
+            <div class="class-stat-value" style="color: {{ ct.color }};">{{ cd.total_topics_covered }}</div>
+            <div class="class-stat-label">विषय पूरे</div>
+          </div>
+        </div>
+
+        <!-- Understanding Breakdown -->
+        {% if cd.understanding %}
+        <div class="understanding-bar">
+          <div class="bar-full" style="width: {{ cd.understanding.full }}%;"></div>
+          <div class="bar-partial" style="width: {{ cd.understanding.partial }}%;"></div>
+          <div class="bar-none" style="width: {{ cd.understanding.none }}%;"></div>
+        </div>
+        <div class="understanding-legend">
+          <span class="legend-item"><span class="legend-dot full"></span> पूरा समझा {{ cd.understanding.full }}%</span>
+          <span class="legend-item"><span class="legend-dot partial"></span> थोड़ा समझा {{ cd.understanding.partial }}%</span>
+          <span class="legend-item"><span class="legend-dot none"></span> नहीं समझा {{ cd.understanding.none }}%</span>
+        </div>
+        {% endif %}
+
+        {% if cd.last_topic %}
+        <div class="class-card-topic">
+          <div class="class-card-topic-label">अंतिम विषय</div>
+          <div class="class-card-topic-name">{{ cd.last_topic }}</div>
+        </div>
+        {% endif %}
+
+        <!-- WhatsApp Share & PDF Download Buttons -->
+        {% if cd.pdf_url %}
+        <div style="display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
+          <a href="{{ cd.pdf_url }}" target="_blank" 
+             style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+                    padding: 10px 16px; border-radius: 12px; text-decoration: none;
+                    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+                    color: #fff; font-family: 'Noto Sans Devanagari', sans-serif; font-size: 13px; font-weight: 600;
+                    transition: all 0.3s ease; min-width: 130px;"
+             onmouseover="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='translateY(-2px)'"
+             onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.transform='translateY(0)'">
+            📄 PDF डाउनलोड
+          </a>
+          <a href="https://api.whatsapp.com/send?text={{ (ct.emoji ~ ' *' ~ ct.name ~ ' — आज का ICT टॉपिक* ' ~ ct.emoji ~ '%0A%0A📖 *विषय:* ' ~ cd.last_topic ~ '%0A%0A📄 *PDF डाउनलोड करें:*%0A' ~ cd.pdf_url ~ '%0A%0A📝 *Feedback Form भरें:*%0A' ~ cd.response_url ~ '%0A%0A— आपके शिक्षक 🙏') | urlencode }}" 
+             target="_blank"
+             style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+                    padding: 10px 16px; border-radius: 12px; text-decoration: none;
+                    background: linear-gradient(135deg, #25D366, #128C7E); border: none;
+                    color: #fff; font-family: 'Noto Sans Devanagari', sans-serif; font-size: 13px; font-weight: 700;
+                    transition: all 0.3s ease; min-width: 130px; box-shadow: 0 4px 15px rgba(37,211,102,0.3);"
+             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(37,211,102,0.4)'"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(37,211,102,0.3)'">
+            📱 WhatsApp Share
+          </a>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+
+    <!-- ===== CHARTS ===== -->
+    <div class="charts-section">
+      <!-- Bar Chart: Read Percentage by Class -->
+      <div class="chart-card">
+        <div class="chart-title">📊 कक्षा-वार पढ़ने की दर (%)</div>
+        <div class="chart-container">
+          <canvas id="readChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Pie Chart: Overall Understanding -->
+      <div class="chart-card">
+        <div class="chart-title">🧠 समग्र समझ वितरण</div>
+        <div class="chart-container">
+          <canvas id="understandingChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Bar Chart: Quiz Scores by Class -->
+      <div class="chart-card">
+        <div class="chart-title">🏆 कक्षा-वार क्विज़ स्कोर</div>
+        <div class="chart-container">
+          <canvas id="quizChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Bar Chart: Responses Over Time -->
+      <div class="chart-card">
+        <div class="chart-title">📈 हाल के दिनों में जवाब</div>
+        <div class="chart-container">
+          <canvas id="trendsChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RECENT TOPICS TABLE ===== -->
+    {% if dashboard_data.recent_topics %}
+    <div class="topics-section">
+      <div class="chart-title" style="margin-bottom: 16px;">📋 हाल के विषय</div>
+      <div style="overflow-x: auto;">
+        <table class="topics-table">
+          <thead>
+            <tr>
+              <th>तारीख</th>
+              <th>कक्षा</th>
+              <th>विषय</th>
+              <th>जवाब</th>
+              <th>पढ़ा %</th>
+              <th>क्विज़ स्कोर</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for topic in dashboard_data.recent_topics %}
+            <tr>
+              <td>{{ topic.date }}</td>
+              <td>
+                {% set badge_colors = {'8': '#3b82f6', '9': '#10b981', '10': '#8b5cf6', '11': '#f59e0b', '12': '#ef4444'} %}
+                <span class="topic-class-badge" style="background: {{ badge_colors[topic.class_standard] }}22; color: {{ badge_colors[topic.class_standard] }};">
+                  कक्षा {{ topic.class_standard }}
+                </span>
+              </td>
+              <td style="font-weight: 600;">{{ topic.topic_name }}</td>
+              <td>{{ topic.responses }}</td>
+              <td>
+                {{ topic.read_percent }}%
+                <span class="score-bar-mini">
+                  <span class="score-bar-mini-fill" style="width: {{ topic.read_percent }}%; background: {% if topic.read_percent >= 70 %}#4ade80{% elif topic.read_percent >= 40 %}#fbbf24{% else %}#f87171{% endif %};"></span>
+                </span>
+              </td>
+              <td>
+                {{ topic.avg_score }}%
+                <span class="score-bar-mini">
+                  <span class="score-bar-mini-fill" style="width: {{ topic.avg_score }}%; background: {% if topic.avg_score >= 70 %}#4ade80{% elif topic.avg_score >= 40 %}#fbbf24{% else %}#f87171{% endif %};"></span>
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ===== FOOTER ===== -->
+    <div class="dash-footer">
+      ICT दैनिक ज्ञान प्रणाली — शिक्षक डैशबोर्ड<br>
+      ❤️ शिक्षा को बेहतर बनाने के लिए
+    </div>
+
+  </div>
+
+  <script>
+    // ============================
+    // CHART.JS CONFIGURATION
+    // ============================
+    
+    // Global defaults
+    Chart.defaults.font.family = "'Inter', 'Noto Sans Devanagari', sans-serif";
+    Chart.defaults.color = 'rgba(255,255,255,0.6)';
+
+    const classLabels = ['कक्षा 8', 'कक्षा 9', 'कक्षा 10', 'कक्षा 11', 'कक्षा 12'];
+    const classColors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444'];
+    const classColorsBg = ['rgba(59,130,246,0.3)', 'rgba(16,185,129,0.3)', 'rgba(139,92,246,0.3)', 'rgba(245,158,11,0.3)', 'rgba(239,68,68,0.3)'];
+
+    // Data from Jinja
+    const readData = [
+      {% for cls in ['8','9','10','11','12'] %}
+        {{ dashboard_data.classes[cls].read_percent if dashboard_data.classes[cls] is defined else 0 }}{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
+
+    const quizData = [
+      {% for cls in ['8','9','10','11','12'] %}
+        {{ dashboard_data.classes[cls].avg_quiz_score if dashboard_data.classes[cls] is defined else 0 }}{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
+
+    // Understanding totals
+    let totalFull = 0, totalPartial = 0, totalNone = 0;
+    {% for cls in ['8','9','10','11','12'] %}
+      {% if dashboard_data.classes[cls] is defined and dashboard_data.classes[cls].understanding is defined %}
+        totalFull += {{ dashboard_data.classes[cls].understanding.full_count | default(0) }};
+        totalPartial += {{ dashboard_data.classes[cls].understanding.partial_count | default(0) }};
+        totalNone += {{ dashboard_data.classes[cls].understanding.none_count | default(0) }};
+      {% endif %}
+    {% endfor %}
+
+    // 1. Read Percentage Bar Chart
+    new Chart(document.getElementById('readChart'), {
+      type: 'bar',
+      data: {
+        labels: classLabels,
+        datasets: [{
+          label: 'पढ़ने की दर (%)',
+          data: readData,
+          backgroundColor: classColors.map(c => c + '88'),
+          borderColor: classColors,
+          borderWidth: 2,
+          borderRadius: 8,
+          barThickness: 40
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            padding: 12,
+            cornerRadius: 10,
+            titleFont: { family: "'Noto Sans Devanagari'" },
+            bodyFont: { family: "'Noto Sans Devanagari'" }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { callback: v => v + '%' }
+          },
+          x: {
+            grid: { display: false }
+          }
+        }
+      }
+    });
+
+    // 2. Understanding Pie Chart
+    new Chart(document.getElementById('understandingChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['पूरा समझा', 'थोड़ा समझा', 'नहीं समझा'],
+        datasets: [{
+          data: [totalFull || {{ dashboard_data.understanding_full | default(40) }}, totalPartial || {{ dashboard_data.understanding_partial | default(35) }}, totalNone || {{ dashboard_data.understanding_none | default(25) }}],
+          backgroundColor: ['#4ade80', '#fbbf24', '#f87171'],
+          borderColor: ['#22c55e', '#eab308', '#ef4444'],
+          borderWidth: 2,
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '55%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 16,
+              usePointStyle: true,
+              pointStyleWidth: 12,
+              font: {
+                family: "'Noto Sans Devanagari'",
+                size: 12
+              }
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            padding: 12,
+            cornerRadius: 10,
+            titleFont: { family: "'Noto Sans Devanagari'" },
+            bodyFont: { family: "'Noto Sans Devanagari'" },
+            callbacks: {
+              label: function(ctx) {
+                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                const pct = total > 0 ? Math.round((ctx.raw / total) * 100) : 0;
+                return ctx.label + ': ' + ctx.raw + ' (' + pct + '%)';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // 3. Quiz Score Bar Chart
+    new Chart(document.getElementById('quizChart'), {
+      type: 'bar',
+      data: {
+        labels: classLabels,
+        datasets: [{
+          label: 'क्विज़ स्कोर (%)',
+          data: quizData,
+          backgroundColor: classColors.map((c, i) => {
+            const ctx2 = document.getElementById('quizChart').getContext('2d');
+            const grad = ctx2.createLinearGradient(0, 0, 0, 300);
+            grad.addColorStop(0, c);
+            grad.addColorStop(1, c + '33');
+            return grad;
+          }),
+          borderColor: classColors,
+          borderWidth: 2,
+          borderRadius: 8,
+          barThickness: 40
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            padding: 12,
+            cornerRadius: 10,
+            titleFont: { family: "'Noto Sans Devanagari'" },
+            bodyFont: { family: "'Noto Sans Devanagari'" }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { callback: v => v + '%' }
+          },
+          x: {
+            grid: { display: false }
+          }
+        }
+      }
+    });
+
+    // 4. Trends Line Chart
+    {% if dashboard_data.trends %}
+    new Chart(document.getElementById('trendsChart'), {
+      type: 'line',
+      data: {
+        labels: [{% for t in dashboard_data.trends %}'{{ t.date }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+          label: 'कुल जवाब',
+          data: [{% for t in dashboard_data.trends %}{{ t.responses }}{% if not loop.last %}, {% endif %}{% endfor %}],
+          borderColor: '#8b5cf6',
+          backgroundColor: 'rgba(139,92,246,0.1)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#8b5cf6',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          borderWidth: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            padding: 12,
+            cornerRadius: 10,
+            titleFont: { family: "'Noto Sans Devanagari'" },
+            bodyFont: { family: "'Noto Sans Devanagari'" }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(255,255,255,0.05)' }
+          },
+          x: {
+            grid: { display: false }
+          }
+        }
+      }
+    });
+    {% else %}
+    // No trend data - show placeholder
+    const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+    trendsCtx.fillStyle = 'rgba(255,255,255,0.2)';
+    trendsCtx.font = "14px 'Noto Sans Devanagari'";
+    trendsCtx.textAlign = 'center';
+    trendsCtx.fillText('अभी तक कोई डेटा उपलब्ध नहीं है', trendsCtx.canvas.width / 2, trendsCtx.canvas.height / 2);
+    {% endif %}
+
+    // ============================
+    // MANUAL TRIGGER FUNCTION
+    // ============================
+    function triggerDaily() {
+      const btn = document.getElementById('triggerBtn');
+      if (!btn) return;
+      
+      btn.disabled = true;
+      btn.innerHTML = '⏳ PDF बन रही है...';
+      btn.style.opacity = '0.7';
+      btn.style.cursor = 'wait';
+
+      fetch('/api/trigger-daily', {
+        method: 'POST',
+        headers: {
+          'X-API-Key': '{{ trigger_api_key }}',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        btn.innerHTML = '✅ शुरू हो गया!';
+        btn.style.background = 'linear-gradient(135deg, #4ade80, #22c55e)';
+        
+        // Show notification
+        const notice = document.createElement('div');
+        notice.innerHTML = '🎉 PDF बन रही है! 2-3 मिनट बाद page refresh होगा और Share बटन दिखेंगे।';
+        notice.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(74,222,128,0.2);border:1px solid rgba(74,222,128,0.4);color:#4ade80;padding:14px 24px;border-radius:14px;font-family:"Noto Sans Devanagari",sans-serif;font-size:14px;font-weight:600;z-index:9999;backdrop-filter:blur(10px);box-shadow:0 8px 30px rgba(0,0,0,0.3);';
+        document.body.appendChild(notice);
+        
+        // Auto-reload after 3 minutes to show fresh data with share buttons
+        setTimeout(() => { window.location.reload(); }, 180000);
+      })
+      .catch(err => {
+        btn.innerHTML = '❌ कुछ गड़बड़ हुई — दोबारा दबाएं';
+        btn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+      });
+    }
+  </script>
+</body>
+</html>

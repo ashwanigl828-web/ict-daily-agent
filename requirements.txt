@@ -1,0 +1,33 @@
+# Google Gemini AI
+google-generativeai>=0.8.0
+
+# Web Framework
+flask>=3.0.0
+gunicorn>=21.2.0
+
+# PDF Generation
+weasyprint>=62.0
+
+# WhatsApp Cloud API
+requests>=2.31.0
+
+# Database (Supabase)
+supabase>=2.0.0
+
+# QR Code Generation
+qrcode[pil]>=7.4.2
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Scheduling (for local testing)
+schedule>=1.2.0
+
+# Image handling
+Pillow>=10.0.0
+
+# Cloud file storage
+cloudinary>=1.36.0
+
+# Date handling
+python-dateutil>=2.8.2

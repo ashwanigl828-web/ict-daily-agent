@@ -1,0 +1,71 @@
+# =============================================================================
+# Render.com Blueprint — ICT Daily PDF Agent
+# =============================================================================
+# This file tells Render.com how to deploy the app.
+# Docs: https://docs.render.com/blueprint-spec
+# =============================================================================
+
+services:
+  - type: web
+    name: ict-daily-agent
+    runtime: python
+    plan: free
+    region: singapore  # Closest to India for low latency
+
+    # ─── Build & Start ───
+    buildCommand: |
+      pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 2
+
+    # ─── Auto Deploy from GitHub ───
+    autoDeploy: true
+
+    # ─── Health Check ───
+    healthCheckPath: /health
+
+    # ─── Environment Variables ───
+    # These MUST be set in Render Dashboard → Environment
+    envVars:
+      # --- Flask ---
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true  # Render auto-generates a secure random value
+
+      # --- Google Gemini AI ---
+      - key: GEMINI_API_KEY
+        sync: false  # Must be set manually in dashboard
+
+      # --- WhatsApp Cloud API ---
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+
+      # --- Supabase Database ---
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+
+      # --- Cloudinary File Storage ---
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      # --- App Configuration ---
+      - key: APP_BASE_URL
+        sync: false  # Set to your Render URL after first deploy
+      - key: TRIGGER_API_KEY
+        sync: false  # API key for GitHub Actions to trigger daily generation
+      - key: TEACHER_NAME
+        value: "Teacher"
+      - key: SCHOOL_NAME
+        value: "My School"
+      - key: PYTHON_VERSION
+        value: "3.11.9"

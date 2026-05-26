@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ जवाब सफलतापूर्वक भेजा गया!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            padding: 20px;
+        }
+        .success-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 50px 40px;
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+            animation: slideUp 0.6s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .checkmark {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, {{ theme.gradient_start }}, {{ theme.gradient_end }});
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 50px;
+            animation: pop 0.5s ease-out 0.3s both;
+        }
+        @keyframes pop {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: {{ theme.gradient_end }};
+        }
+        .message {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+        .student-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: {{ theme.gradient_end }};
+            margin-bottom: 5px;
+        }
+        .class-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, {{ theme.gradient_start }}, {{ theme.gradient_end }});
+            color: #fff;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .stars {
+            font-size: 30px;
+            margin: 20px 0;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .back-btn {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+        }
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="success-card">
+        <div class="checkmark">✅</div>
+        <h1>जवाब भेज दिया गया! 🎉</h1>
+        <div class="student-name">{{ student_name }}</div>
+        <div class="class-badge">{{ theme.emoji }} कक्षा {{ class_standard }}</div>
+        <div class="message">
+            धन्यवाद! 🙏<br>
+            आपका जवाब सफलतापूर्वक सेव हो गया है।<br>
+            कल का नया टॉपिक WhatsApp पर आएगा!
+        </div>
+        <div class="stars">⭐ 🌟 ⭐</div>
+        <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 20px;">
+            पढ़ते रहो, बढ़ते रहो! 📚
+        </p>
+    </div>
+</body>
+</html>

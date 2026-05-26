@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>कक्षा {{ class_standard }} — विस्तृत जानकारी | ICT दैनिक एजेंट</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .detail-header {
+            background: linear-gradient(135deg, {{ theme.gradient_start }}, {{ theme.gradient_end }});
+            padding: 40px 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .detail-header h1 {
+            font-size: 28px;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        .detail-header p {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+        }
+        .stat-card .value {
+            font-size: 36px;
+            font-weight: 700;
+            color: {{ theme.gradient_end }};
+        }
+        .stat-card .label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 8px;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: {{ theme.gradient_end }};
+            margin: 30px 0 15px;
+            padding-left: 15px;
+            border-left: 4px solid {{ theme.primary }};
+        }
+        .topic-list {
+            list-style: none;
+            padding: 0;
+        }
+        .topic-list li {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .topic-list li .topic-name {
+            font-weight: 600;
+            color: #fff;
+        }
+        .topic-list li .topic-date {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+        }
+        .response-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .response-table th, .response-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .response-table th {
+            color: {{ theme.gradient_end }};
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .response-table td {
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-success { background: rgba(76,175,80,0.2); color: #66BB6A; }
+        .badge-warning { background: rgba(255,152,0,0.2); color: #FFA726; }
+        .badge-danger { background: rgba(244,67,54,0.2); color: #EF5350; }
+        .improvement-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .improvement-card .date {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+        }
+        .improvement-card .suggestion {
+            color: rgba(255,255,255,0.8);
+            margin-top: 10px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: color 0.3s;
+        }
+        .back-link:hover { color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 900px; margin: 0 auto; padding: 30px 20px;">
+        <a href="/dashboard" class="back-link">← डैशबोर्ड पर वापस जाएं</a>
+
+        <div class="detail-header">
+            <div style="font-size: 50px; margin-bottom: 15px;">{{ theme.emoji }}</div>
+            <h1>{{ theme.name }} — विस्तृत जानकारी</h1>
+            <p>📊 कुल {{ covered_topics|length }} टॉपिक कवर हुए</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="value">{{ stats.total_responses if stats.total_responses else 0 }}</div>
+                <div class="label">📝 कुल जवाब (7 दिन)</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">{{ stats.read_percentage if stats.read_percentage else 0 }}%</div>
+                <div class="label">📖 पढ़ने वाले</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">{{ stats.avg_quiz_score if stats.avg_quiz_score else 0 }}</div>
+                <div class="label">🏆 औसत क्विज़ स्कोर</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">{{ covered_topics|length }}</div>
+                <div class="label">📚 कुल टॉपिक</div>
+            </div>
+        </div>
+
+        <!-- Today's Responses -->
+        <h2 class="section-title">📝 आज के जवाब</h2>
+        {% if recent_responses %}
+        <div style="overflow-x: auto;">
+            <table class="response-table">
+                <thead>
+                    <tr>
+                        <th>छात्र का नाम</th>
+                        <th>पढ़ा?</th>
+                        <th>समझ</th>
+                        <th>कठिन भाग</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resp in recent_responses %}
+                    <tr>
+                        <td>{{ resp.student_name }}</td>
+                        <td>
+                            {% if resp.has_read %}
+                                <span class="badge badge-success">हाँ ✅</span>
+                            {% else %}
+                                <span class="badge badge-danger">नहीं ❌</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if resp.understanding_level == 'पूरा समझा' %}
+                                <span class="badge badge-success">{{ resp.understanding_level }}</span>
+                            {% elif resp.understanding_level == 'थोड़ा समझा' %}
+                                <span class="badge badge-warning">{{ resp.understanding_level }}</span>
+                            {% else %}
+                                <span class="badge badge-danger">{{ resp.understanding_level }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ resp.difficult_part or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: rgba(255,255,255,0.5); padding: 20px;">आज अभी तक कोई जवाब नहीं आया।</p>
+        {% endif %}
+
+        <!-- Recent Topics -->
+        <h2 class="section-title">📚 हाल के टॉपिक</h2>
+        <ul class="topic-list">
+            {% for topic in covered_topics|reverse %}
+            <li>
+                <span class="topic-name">{{ topic.topic_name }}
+                    {% if topic.total_parts > 1 %} (भाग {{ topic.part_number }}/{{ topic.total_parts }}){% endif %}
+                </span>
+                <span class="topic-date">{{ topic.sent_date }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <!-- AI Improvement Suggestions -->
+        {% if improvements %}
+        <h2 class="section-title">🤖 AI सुझाव</h2>
+        {% for imp in improvements %}
+        <div class="improvement-card">
+            <div class="date">{{ imp.log_date }} | औसत समझ: {{ imp.avg_understanding }}% | क्विज़: {{ imp.avg_quiz_score }}%</div>
+            <div class="suggestion">{{ imp.ai_suggestions }}</div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</body>
+</html>

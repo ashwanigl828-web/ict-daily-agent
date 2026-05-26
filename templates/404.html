@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — पेज नहीं मिला</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #fff;
+            padding: 20px;
+        }
+        .error-card {
+            text-align: center;
+            max-width: 450px;
+        }
+        .error-code {
+            font-size: 120px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF6B6B, #FFD93D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+        .error-emoji { font-size: 60px; margin: 20px 0; }
+        h1 { font-size: 22px; margin-bottom: 15px; }
+        p { color: rgba(255,255,255,0.6); margin-bottom: 30px; line-height: 1.6; }
+        a {
+            display: inline-block;
+            background: linear-gradient(135deg, #4ECDC4, #45B7D1);
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-card">
+        <div class="error-code">404</div>
+        <div class="error-emoji">🔍</div>
+        <h1>पेज नहीं मिला!</h1>
+        <p>जो पेज आप ढूंढ रहे हैं वह मौजूद नहीं है।<br>कृपया सही लिंक का उपयोग करें।</p>
+        <a href="/dashboard">🏠 डैशबोर्ड पर जाएं</a>
+    </div>
+</body>
+</html>

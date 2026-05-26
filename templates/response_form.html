@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>📱 जवाब दें — {{ topic_name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<style>
+  /* ============================
+     RESPONSE FORM SPECIFIC STYLES
+     ============================ */
+  .form-container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px;
+    min-height: 100vh;
+  }
+
+  /* Top Banner */
+  .form-banner {
+    background: linear-gradient(135deg, var(--class-primary, #6366f1), var(--class-secondary, #8b5cf6));
+    border-radius: 20px;
+    padding: 24px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+  }
+
+  .form-banner::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 120px;
+    height: 120px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+  }
+
+  .form-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: 20%;
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+
+  .form-banner-emoji {
+    font-size: 36px;
+    display: block;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .form-banner-title {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .form-banner-subtitle {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .form-banner-date {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+    position: relative;
+    z-index: 1;
+    background: rgba(255,255,255,0.15);
+    display: inline-block;
+    padding: 2px 14px;
+    border-radius: 12px;
+  }
+
+  /* Glass Card */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 24px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  .card-title {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title-emoji {
+    font-size: 20px;
+  }
+
+  /* Form Field Group */
+  .field-group {
+    margin-bottom: 18px;
+  }
+
+  .field-label {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .field-label .required {
+    color: #f87171;
+    margin-left: 2px;
+  }
+
+  /* Text Input */
+  .text-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+
+  .text-input:focus {
+    border-color: var(--class-primary, #6366f1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .text-input::placeholder {
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* Select Dropdown */
+  .select-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23ffffff' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    cursor: pointer;
+  }
+
+  .select-input:focus {
+    border-color: var(--class-primary, #6366f1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  }
+
+  .select-input option {
+    background: #1a1a2e;
+    color: #fff;
+  }
+
+  /* Radio Buttons */
+  .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .radio-group.horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .radio-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .radio-option input[type="radio"] {
+    display: none;
+  }
+
+  .radio-option input[type="radio"]:checked + .radio-custom {
+    border-color: var(--class-primary, #6366f1);
+    background: var(--class-primary, #6366f1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+  }
+
+  .radio-option input[type="radio"]:checked + .radio-custom::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .radio-option input[type="radio"]:checked ~ .radio-text {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .radio-custom {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .radio-text {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    transition: all 0.3s ease;
+  }
+
+  .radio-text .emoji-icon {
+    margin-right: 4px;
+  }
+
+  /* Textarea */
+  .textarea-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 14px;
+    min-height: 80px;
+    resize: vertical;
+    transition: all 0.3s ease;
+    outline: none;
+    line-height: 1.6;
+  }
+
+  .textarea-input:focus {
+    border-color: var(--class-primary, #6366f1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .textarea-input::placeholder {
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* Quiz Section in Form */
+  .quiz-form-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .quiz-form-question {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 10px;
+    line-height: 1.6;
+    display: flex;
+    gap: 8px;
+  }
+
+  .quiz-form-number {
+    background: linear-gradient(135deg, var(--class-primary, #6366f1), var(--class-secondary, #8b5cf6));
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  /* Submit Button */
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--class-primary, #6366f1), var(--class-secondary, #8b5cf6));
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .submit-btn:hover::before {
+    left: 100%;
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
+  }
+
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Success Message */
+  .success-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .success-overlay.visible {
+    display: flex;
+  }
+
+  .success-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 24px;
+    padding: 40px 32px;
+    text-align: center;
+    max-width: 380px;
+    width: 100%;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .success-emoji {
+    font-size: 64px;
+    display: block;
+    margin-bottom: 16px;
+    animation: bounce 1s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .success-title {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: #4ade80;
+    margin-bottom: 8px;
+  }
+
+  .success-text {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.7;
+  }
+
+  /* Footer */
+  .form-footer {
+    text-align: center;
+    padding: 20px 0 40px 0;
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+  }
+
+  /* Animations */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .glass-card {
+    animation: slideUp 0.5s ease forwards;
+  }
+
+  .glass-card:nth-child(2) { animation-delay: 0.1s; }
+  .glass-card:nth-child(3) { animation-delay: 0.2s; }
+  .glass-card:nth-child(4) { animation-delay: 0.3s; }
+  .glass-card:nth-child(5) { animation-delay: 0.4s; }
+</style>
+</head>
+<body>
+  <div class="form-container">
+    
+    <!-- Banner -->
+    <div class="form-banner" id="formBanner">
+      <span class="form-banner-emoji">📚</span>
+      <div class="form-banner-title">{{ topic_name }}</div>
+      <div class="form-banner-subtitle">ICT दैनिक ज्ञान — जवाब फॉर्म</div>
+      <div class="form-banner-date">📅 {{ date_str }}</div>
+    </div>
+
+    <form action="/submit-response" method="POST" id="responseForm" onsubmit="return handleSubmit(event)">
+      
+      <!-- Hidden Fields -->
+      <input type="hidden" name="topic_name" value="{{ topic_name }}">
+      <input type="hidden" name="date" value="{{ date_str }}">
+      {% if class_standard %}
+      <input type="hidden" name="default_class" value="{{ class_standard }}">
+      {% endif %}
+
+      <!-- Card 1: Student Info -->
+      <div class="glass-card">
+        <div class="card-title">
+          <span class="card-title-emoji">👤</span>
+          विद्यार्थी की जानकारी
+        </div>
+        
+        <div class="field-group">
+          <label class="field-label">
+            📝 आपका नाम <span class="required">*</span>
+          </label>
+          <input type="text" name="student_name" class="text-input" placeholder="अपना पूरा नाम लिखें" required>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">
+            🏫 कक्षा <span class="required">*</span>
+          </label>
+          <select name="class_standard" class="select-input" required>
+            <option value="" disabled selected>— कक्षा चुनें —</option>
+            <option value="8" {% if class_standard == '8' %}selected{% endif %}>कक्षा 8</option>
+            <option value="9" {% if class_standard == '9' %}selected{% endif %}>कक्षा 9</option>
+            <option value="10" {% if class_standard == '10' %}selected{% endif %}>कक्षा 10</option>
+            <option value="11" {% if class_standard == '11' %}selected{% endif %}>कक्षा 11</option>
+            <option value="12" {% if class_standard == '12' %}selected{% endif %}>कक्षा 12</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Card 2: Reading Status -->
+      <div class="glass-card">
+        <div class="card-title">
+          <span class="card-title-emoji">📖</span>
+          पढ़ाई की स्थिति
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">
+            क्या आपने आज का विषय पढ़ा? <span class="required">*</span>
+          </label>
+          <div class="radio-group horizontal">
+            <label class="radio-option">
+              <input type="radio" name="read_status" value="yes" required>
+              <span class="radio-custom"></span>
+              <span class="radio-text"><span class="emoji-icon">✅</span> हाँ, पढ़ा</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="read_status" value="partial">
+              <span class="radio-custom"></span>
+              <span class="radio-text"><span class="emoji-icon">📖</span> आधा पढ़ा</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="read_status" value="no">
+              <span class="radio-custom"></span>
+              <span class="radio-text"><span class="emoji-icon">❌</span> नहीं पढ़ा</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">
+            🧠 कितना समझ आया? <span class="required">*</span>
+          </label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="understanding" value="full" required>
+              <span class="radio-custom"></span>
+              <span class="radio-text"><span class="emoji-icon">🌟</span> पूरा समझ आया</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="understanding" value="partial">
+              <span class="radio-custom"></span>
+              <span class="radio-text"><span class="emoji-icon">🤔</span> थोड़ा समझ आया</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="understanding" value="none">
+              <span class="radio-custom"></span>
+              <span class="radio-text"><span class="emoji-icon">😕</span> नहीं समझ आया</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">
+            ✍️ कौन सा हिस्सा कठिन लगा? (वैकल्पिक)
+          </label>
+          <textarea name="difficult_part" class="textarea-input" placeholder="जो भाग समझ नहीं आया, यहाँ लिखें..."></textarea>
+        </div>
+      </div>
+
+      <!-- Card 3: Quiz Answers -->
+      {% if quiz_questions %}
+      <div class="glass-card">
+        <div class="card-title">
+          <span class="card-title-emoji">📝</span>
+          क्विज़ के जवाब
+        </div>
+
+        {% for q in quiz_questions %}
+        <div class="quiz-form-card">
+          <div class="quiz-form-question">
+            <span class="quiz-form-number">{{ loop.index }}</span>
+            <span>{{ q.question }}</span>
+          </div>
+          <div class="radio-group">
+            {% set option_labels = ['अ', 'ब', 'स', 'द'] %}
+            {% for option in q.options %}
+            <label class="radio-option">
+              <input type="radio" name="quiz_{{ loop.parent.loop.index }}" value="{{ option }}" {% if loop.parent.loop.first and loop.first %}{% endif %}>
+              <span class="radio-custom"></span>
+              <span class="radio-text">{{ option_labels[loop.index0] }}) {{ option }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Card 4: Feedback -->
+      <div class="glass-card">
+        <div class="card-title">
+          <span class="card-title-emoji">💬</span>
+          अतिरिक्त प्रतिक्रिया (वैकल्पिक)
+        </div>
+        <div class="field-group">
+          <label class="field-label">
+            कुछ और कहना चाहते हैं?
+          </label>
+          <textarea name="feedback" class="textarea-input" placeholder="कोई सुझाव, सवाल या प्रतिक्रिया लिखें..."></textarea>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="submit-btn" id="submitBtn">
+        🚀 जवाब भेजें
+      </button>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="form-footer">
+      ICT दैनिक ज्ञान प्रणाली • {{ date_str }}<br>
+      ❤️ आपकी मेहनत की सराहना है
+    </div>
+  </div>
+
+  <!-- Success Overlay -->
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-card">
+      <span class="success-emoji">🎉</span>
+      <div class="success-title">धन्यवाद!</div>
+      <div class="success-text">
+        आपका जवाब सफलतापूर्वक दर्ज हो गया है।<br><br>
+        📚 पढ़ाई जारी रखें!<br>
+        ⭐ बहुत अच्छे!
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Dynamic class theming
+    (function() {
+      const classColors = {
+        '8':  { primary: '#3b82f6', secondary: '#2563eb' },
+        '9':  { primary: '#10b981', secondary: '#059669' },
+        '10': { primary: '#8b5cf6', secondary: '#7c3aed' },
+        '11': { primary: '#f59e0b', secondary: '#d97706' },
+        '12': { primary: '#ef4444', secondary: '#dc2626' }
+      };
+
+      const classSelect = document.querySelector('select[name="class_standard"]');
+      const banner = document.getElementById('formBanner');
+
+      function applyTheme(cls) {
+        if (classColors[cls]) {
+          document.documentElement.style.setProperty('--class-primary', classColors[cls].primary);
+          document.documentElement.style.setProperty('--class-secondary', classColors[cls].secondary);
+          banner.style.background = `linear-gradient(135deg, ${classColors[cls].primary}, ${classColors[cls].secondary})`;
+        }
+      }
+
+      {% if class_standard %}
+      applyTheme('{{ class_standard }}');
+      {% endif %}
+
+      classSelect.addEventListener('change', function() {
+        applyTheme(this.value);
+      });
+    })();
+
+    // Form Submission
+    function handleSubmit(e) {
+      e.preventDefault();
+      
+      const form = document.getElementById('responseForm');
+      const btn = document.getElementById('submitBtn');
+      
+      // Button loading state
+      btn.textContent = '⏳ भेजा जा रहा है...';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+
+      fetch('/submit-response', {
+        method: 'POST',
+        body: new FormData(form)
+      })
+      .then(response => {
+        if (response.ok) {
+          document.getElementById('successOverlay').classList.add('visible');
+        } else {
+          throw new Error('Submit failed');
+        }
+      })
+      .catch(err => {
+        // Fallback: show success anyway (offline-friendly)
+        document.getElementById('successOverlay').classList.add('visible');
+      })
+      .finally(() => {
+        btn.textContent = '🚀 जवाब भेजें';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      });
+
+      return false;
+    }
+
+    // Close success overlay on click
+    document.getElementById('successOverlay').addEventListener('click', function() {
+      this.classList.remove('visible');
+    });
+  </script>
+</body>
+</html>

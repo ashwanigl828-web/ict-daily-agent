@@ -160,24 +160,17 @@ def dashboard():
     try:
         dashboard_data = db.get_dashboard_data()
     except Exception as e:
-        logger.error(f"Error loading dashboard: {e}")
-        dashboard_data = {}
-
-    # Enrich class data with PDF download URLs and response form URLs
-    if isinstance(dashboard_data, dict) and "classes" in dashboard_data:
-        for cls, cd in dashboard_data["classes"].items():
-            # Get the latest topic's PDF URL from DB
-            try:
-                last_topic_data = db.get_last_topic(cls)
-                if last_topic_data:
-                    cd["pdf_url"] = last_topic_data.get("pdf_url", "")
-                    cd["response_url"] = f"{config.APP_BASE_URL}/form/{cls}/{date.today().isoformat()}"
-                else:
-                    cd["pdf_url"] = ""
-                    cd["response_url"] = ""
-            except Exception:
-                cd["pdf_url"] = ""
-                cd["response_url"] = ""
+        logger.error(f"Error loading dashboard: {e}", exc_info=True)
+        # Return safe empty structure so template doesn't crash
+        dashboard_data = {
+            "current_date": date.today().isoformat(),
+            "total_responses": 0,
+            "total_read_percent": 0,
+            "avg_quiz_score": 0,
+            "total_topics": 0,
+            "classes": {},
+            "recent_topics": [],
+        }
 
     whatsapp_configured = bool(config.WHATSAPP_ACCESS_TOKEN)
 
